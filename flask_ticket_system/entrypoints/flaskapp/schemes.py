@@ -8,7 +8,5 @@ class Assigment(BaseModel):
 
 class CreateTicket(BaseModel):
     title: str = Field(..., min_length=1, max_length=100)
-    description: str = Field(..., min_length=1, max_length=1000)
-    status: int = Field(..., ge=1, le=3)
-    assigned: int = Field(None, ge=1)
+    content: str = Field(..., min_length=1, max_length=1000)
     assigment: Assigment
