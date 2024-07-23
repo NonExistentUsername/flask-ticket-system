@@ -5,7 +5,7 @@ from typing import TYPE_CHECKING, Optional
 
 from kytool.domain.base import BaseModel
 
-from flask_ticket_system.domain.assigment import Assigment
+from flask_ticket_system.domain.tickets.assigment import Assigment
 
 if TYPE_CHECKING:
     from flask_ticket_system.domain.rbac import Group, User
