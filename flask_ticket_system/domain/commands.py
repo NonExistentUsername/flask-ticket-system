@@ -16,3 +16,13 @@ class CreateTicketCommand(Command):
         self.content = content
         self.assignment = assigment
         self.status = status
+
+
+class LoginCommand(Command):
+    def __init__(
+        self,
+        username: str,
+        password: str,
+    ):
+        self.username = username
+        self.password = password

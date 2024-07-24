@@ -18,6 +18,10 @@ class Permission(BaseModel):
         self.name = name
         self.key = key
 
+    @staticmethod
+    def from_key(key: str) -> "Permission":
+        return Permission(name=key, key=key)
+
     def __eq__(self, other):
         return isinstance(other, Permission) and self.key == other.key
 

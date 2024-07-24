@@ -5,7 +5,9 @@ from typing import Optional
 import jwt
 from kytool.domain.base import BaseModel
 
+from flask_ticket_system import config
 from flask_ticket_system.domain.rbac.group import Group
+from flask_ticket_system.domain.rbac.permission import Permission
 
 
 def get_password_hash(password: str) -> str:
@@ -33,3 +35,15 @@ class User(BaseModel):
 
     def check_password(self, password: str) -> bool:
         return check_password(password, self.password_hash)
+
+    def has_permission(self, permission: Permission) -> bool:
+        return any(group.has_permission(permission) for group in self.groups)
+
+    def create_token(self) -> str:
+        return str(
+            jwt.encode(
+                {"id": self.id, "exp": "idkwhen"},
+                config.get_secret_key(),
+                algorithm="HS256",
+            )
+        )
