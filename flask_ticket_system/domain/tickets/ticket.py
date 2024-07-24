@@ -21,7 +21,7 @@ class Ticket(BaseModel):
     def __init__(
         self,
         title: str,
-        description: str,
+        content: str,
         status: TicketStatus,
         assigment: Assigment,
         id: Optional[int] = None,
@@ -29,25 +29,19 @@ class Ticket(BaseModel):
         super().__init__()
         self.id = id
         self.title = title
-        self.description = description
+        self.content = content
         self.status = status
         self.assigment = assigment
 
     @staticmethod
     def create(
         title: str,
-        description: str,
-        status: TicketStatus,
-        user: Optional["User"] = None,
-        group: Optional["Group"] = None,
+        content: str,
+        assigment: Assigment,
     ) -> "Ticket":
-        if not user and not group:
-            raise ValueError("Either user or group must be provided")
-
-        assigment = Assigment(
-            user_id=user.id if user else None, group_id=group.id if group else None
-        )
-
         return Ticket(
-            title=title, description=description, status=status, assigment=assigment
+            title=title,
+            content=content,
+            status=TicketStatus.PENDING,
+            assigment=assigment,
         )
