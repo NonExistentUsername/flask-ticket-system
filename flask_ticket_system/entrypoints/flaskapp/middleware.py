@@ -1,9 +1,12 @@
+from functools import wraps
+
 from flask import Response, request
 from pydantic import BaseModel, ValidationError
 
 
 def model_middleware(model: type[BaseModel]):
     def decorator(func):
+        @wraps(func)
         def wrapper(*args, **kwargs):
             data = request.data
             try:
@@ -20,6 +23,7 @@ def model_middleware(model: type[BaseModel]):
 
 
 def authorization_middleware(func):
+    @wraps(func)
     def wrapper(*args, **kwargs):
         token = request.headers.get("Authorization")
         if not token:
