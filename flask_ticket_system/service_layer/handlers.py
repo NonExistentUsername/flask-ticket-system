@@ -159,3 +159,18 @@ def update_ticket(
     ticket.status = command.status
     uow.commit()
     return ticket
+
+
+@register_handler(commands.CreateUserCommand)
+def create_user(
+    command: commands.CreateUserCommand,
+    uow: AbstractUnitOfWork,
+):
+    user = User(
+        username=command.username,
+        password=command.password,
+        is_superuser=command.is_superuser,
+    )
+    uow.users.add(user)
+    uow.commit()
+    return user

@@ -18,6 +18,18 @@ class CreateTicketCommand(Command):
         self.status = status
 
 
+class CreateUserCommand(Command):
+    def __init__(
+        self,
+        username: str,
+        password: str,
+        is_superuser: bool = False,
+    ):
+        self.username = username
+        self.password = password
+        self.is_superuser = is_superuser
+
+
 class LoginCommand(Command):
     def __init__(
         self,
