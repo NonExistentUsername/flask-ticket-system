@@ -17,3 +17,13 @@ def model_middleware(model: type[BaseModel]):
         return wrapper
 
     return decorator
+
+
+def authorization_middleware(func):
+    def wrapper(*args, **kwargs):
+        token = request.headers.get("Authorization")
+        if not token:
+            return Response("Unauthorized", status=401)
+        return func(token, *args, **kwargs)
+
+    return wrapper

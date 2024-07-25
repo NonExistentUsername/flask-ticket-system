@@ -6,14 +6,15 @@ from flask_ticket_system.domain import (
     Ticket,
     TicketStatus,
     User,
+    commands,
+    exceptions,
 )
-from flask_ticket_system.domain.commands import CreateTicketCommand, LoginCommand
 from flask_ticket_system.service_layer.unit_of_work import AbstractUnitOfWork
 
 
-@register_handler(CreateTicketCommand)
+@register_handler(commands.CreateTicketCommand)
 def create_ticket_handler(
-    command: CreateTicketCommand,
+    command: commands.CreateTicketCommand,
     uow: AbstractUnitOfWork,
 ) -> Ticket:
     ticket = Ticket.create(
@@ -26,9 +27,9 @@ def create_ticket_handler(
     return ticket
 
 
-@register_handler(LoginCommand)
+@register_handler(commands.LoginCommand)
 def login_handler(
-    command: LoginCommand,
+    command: commands.LoginCommand,
     uow: AbstractUnitOfWork,
 ) -> str:
     user = uow.users.get(username=command.username)
@@ -40,3 +41,25 @@ def login_handler(
         raise InvalidCredentialsException("Invalid password")
 
     return user.create_token()
+
+
+@register_handler(commands.GetTicketCommand)
+def get_ticket(
+    command: commands.GetTicketCommand,
+    uow: AbstractUnitOfWork,
+) -> Ticket:
+    decoded_token = User.decode_token(command.token)
+    user = uow.users.get(id=decoded_token.get("id", -1))
+
+    if not user:
+        raise exceptions.UnauthorizedException("User not found")
+
+    ticket = uow.tickets.get(id=command.ticket_id)
+
+    if not ticket:
+        raise exceptions.TicketNotFoundException("Ticket not found")
+
+    if not ticket.can_access(user):
+        raise exceptions.UnauthorizedException("Unauthorized")
+
+    return ticket

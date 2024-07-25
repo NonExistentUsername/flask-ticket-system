@@ -1,11 +1,13 @@
 from flask import Response, jsonify, request
 from pydantic import ValidationError
 
-from flask_ticket_system.domain import exceptions
-from flask_ticket_system.domain.commands import CreateTicketCommand, LoginCommand
+from flask_ticket_system.domain import commands, exceptions
 from flask_ticket_system.domain.tickets import Assigment, AssigmentType, Ticket
 from flask_ticket_system.entrypoints.flaskapp.messagebus import message_bus
-from flask_ticket_system.entrypoints.flaskapp.middleware import model_middleware
+from flask_ticket_system.entrypoints.flaskapp.middleware import (
+    authorization_middleware,
+    model_middleware,
+)
 from flask_ticket_system.entrypoints.flaskapp.schemes import Assigment as PAssigment
 from flask_ticket_system.entrypoints.flaskapp.schemes import CreateTicket, Login
 
@@ -13,7 +15,7 @@ from flask_ticket_system.entrypoints.flaskapp.schemes import CreateTicket, Login
 @model_middleware(CreateTicket)
 def create_ticket(create_ticket: CreateTicket):
     ticket: Ticket = message_bus.handle(
-        CreateTicketCommand(
+        commands.CreateTicketCommand(
             create_ticket.title,
             create_ticket.content,
             Assigment(
@@ -34,7 +36,7 @@ def create_ticket(create_ticket: CreateTicket):
 def login(login: Login):
     try:
         token: str = message_bus.handle(
-            LoginCommand(
+            commands.LoginCommand(
                 login.username,
                 login.password,
             )
@@ -45,5 +47,28 @@ def login(login: Login):
     return jsonify(
         {
             "token": token,
+        }
+    )
+
+
+@authorization_middleware
+def view_ticket(token: str, ticket_id: int):
+    try:
+        ticket: Ticket = message_bus.handle(commands.GetTicketCommand(ticket_id, token))
+    except exceptions.TicketNotFoundException:
+        return Response("Ticket not found", status=404)
+    except exceptions.UnauthorizedException:
+        return Response("Ticket not found", status=404)  # Haha, you will never know
+
+    return jsonify(
+        {
+            "id": ticket.id,
+            "title": ticket.title,
+            "content": ticket.content,
+            "status": ticket.status,
+            "assigment": {
+                "assigment_type": ticket.assigment.object_type,
+                "assigment_id": ticket.assigment.object_id,
+            },
         }
     )

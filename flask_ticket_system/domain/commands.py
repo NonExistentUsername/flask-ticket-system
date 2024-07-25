@@ -26,3 +26,13 @@ class LoginCommand(Command):
     ):
         self.username = username
         self.password = password
+
+
+class GetTicketCommand(Command):
+    def __init__(
+        self,
+        ticket_id: int,
+        token: str,
+    ):
+        self.ticket_id = ticket_id
+        self.token = token

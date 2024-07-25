@@ -6,6 +6,7 @@ import jwt
 from kytool.domain.base import BaseModel
 
 from flask_ticket_system import config
+from flask_ticket_system.domain import exceptions
 from flask_ticket_system.domain.rbac.group import Group
 from flask_ticket_system.domain.rbac.permission import Permission
 
@@ -26,17 +27,21 @@ class User(BaseModel):
         password_hash: Optional[str] = None,
         groups: Optional[list[Group]] = None,
         id: Optional[int] = None,
+        is_superuser: Optional[bool] = False,
     ):
         super().__init__()
         self.id = id
         self.username = username
         self.groups = groups or []
+        self.is_superuser = is_superuser
         self.password_hash = password_hash or get_password_hash(password or "")
 
     def check_password(self, password: str) -> bool:
         return check_password(password, self.password_hash)
 
     def has_permission(self, permission: Permission) -> bool:
+        if self.is_superuser:
+            return True
         return any(group.has_permission(permission) for group in self.groups)
 
     def create_token(self) -> str:
@@ -47,3 +52,16 @@ class User(BaseModel):
                 algorithm="HS256",
             )
         )
+
+    @staticmethod
+    def decode_token(token: str) -> dict:
+        try:
+            return jwt.decode(
+                token, config.get_secret_key(), algorithms=["HS256"], verify=True
+            )
+        except (
+            jwt.ExpiredSignatureError,
+            jwt.InvalidTokenError,
+            jwt.InvalidSignatureError,
+        ) as e:
+            raise exceptions.UnauthorizedException("Unauthorized") from e

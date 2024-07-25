@@ -7,3 +7,11 @@ class AssigmentException(InternalException):
 
 class InvalidCredentialsException(InternalException):
     pass
+
+
+class TicketNotFoundException(InternalException):
+    pass
+
+
+class UnauthorizedException(InternalException):
+    pass

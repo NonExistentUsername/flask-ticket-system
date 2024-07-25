@@ -8,7 +8,7 @@ from kytool.domain.base import BaseModel
 from flask_ticket_system.domain.tickets.assigment import Assigment
 
 if TYPE_CHECKING:
-    from flask_ticket_system.domain.rbac import Group, User
+    from flask_ticket_system.domain.rbac import Group, Permission, User
 
 
 class TicketStatus(enum.IntEnum):
@@ -45,3 +45,14 @@ class Ticket(BaseModel):
             status=TicketStatus.PENDING,
             assigment=assigment,
         )
+
+    def can_access(self, user: User) -> bool:
+        if self.assigment.object_type == "group":
+            return user.has_permission(
+                Permission(
+                    name="Ticket view",
+                    key=f"ticket:group:{self.assigment.object_id}",
+                )
+            )
+
+        return user.id == self.assigment.object_id

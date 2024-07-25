@@ -4,6 +4,7 @@ from typing import Optional
 from kytool.domain.base import BaseModel
 
 from flask_ticket_system.domain.exceptions import AssigmentException
+from flask_ticket_system.domain.rbac.permission import Permission
 
 
 class AssigmentType(enum.Enum):
