@@ -1,7 +1,7 @@
 from flask import Response, jsonify, request
 from pydantic import ValidationError
 
-from flask_ticket_system.domain import Group, commands, exceptions
+from flask_ticket_system.domain import Group, User, commands, exceptions
 from flask_ticket_system.domain.tickets import Assigment, AssigmentType, Ticket
 from flask_ticket_system.entrypoints.flaskapp.messagebus import message_bus
 from flask_ticket_system.entrypoints.flaskapp.middleware import (
@@ -13,7 +13,28 @@ from flask_ticket_system.entrypoints.flaskapp.schemes import (
     AddUserToGroup,
 )
 from flask_ticket_system.entrypoints.flaskapp.schemes import Assigment as PAssigment
-from flask_ticket_system.entrypoints.flaskapp.schemes import CreateGroup
+from flask_ticket_system.entrypoints.flaskapp.schemes import CreateGroup, CreateUser
+
+
+@authorization_middleware
+@model_middleware(CreateUser)
+def create_user(token: str, create_user: CreateUser):
+    try:
+        user: User = message_bus.handle(
+            commands.CreateUserCommand(
+                create_user.username,
+                create_user.password,
+                create_user.is_superuser,
+            )
+        )
+    except exceptions.UserAlreadyExistsException:
+        return Response("User already exists", status=400)
+
+    return jsonify(
+        {
+            "id": user.id,
+        }
+    )
 
 
 @model_middleware(CreateGroup)

@@ -4,10 +4,12 @@ from flask_ticket_system.entrypoints.flaskapp.admin_endpoints import (
     add_permission_to_group,
     add_user_to_group,
     create_group,
+    create_user,
 )
 from flask_ticket_system.entrypoints.flaskapp.endpoints import (
     create_ticket,
     login,
+    update_ticket,
     view_ticket,
 )
 
@@ -18,6 +20,7 @@ app.add_url_rule("/login/", view_func=login, methods=["POST"])
 
 app.add_url_rule("/ticket/", view_func=create_ticket, methods=["POST"])
 app.add_url_rule("/ticket/<int:ticket_id>/", view_func=view_ticket, methods=["GET"])
+app.add_url_rule("/ticket/<int:ticket_id>/", view_func=update_ticket, methods=["PUT"])
 
 
 app.add_url_rule("/admin/group/", view_func=create_group, methods=["POST"])
@@ -27,6 +30,7 @@ app.add_url_rule(
     view_func=add_permission_to_group,
     methods=["POST"],
 )
+app.add_url_rule("/admin/user/", view_func=create_user, methods=["POST"])
 
 if __name__ == "__main__":
     app.run()

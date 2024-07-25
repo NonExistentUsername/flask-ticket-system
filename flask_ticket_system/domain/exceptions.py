@@ -23,3 +23,7 @@ class GroupNotFoundException(InternalException):
 
 class UserNotFoundException(InternalException):
     pass
+
+
+class UserAlreadyExistsException(InternalException):
+    pass

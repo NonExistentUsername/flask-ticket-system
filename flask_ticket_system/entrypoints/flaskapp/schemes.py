@@ -44,3 +44,9 @@ class AddPermissionToGroup(BaseModel):
     permission: str = Field(..., min_length=1, max_length=100)
     group_id: int = Field(..., ge=1)
     token: str = Field(..., min_length=1, max_length=100)
+
+
+class CreateUser(BaseModel):
+    username: str = Field(..., min_length=1, max_length=100)
+    password: str = Field(..., min_length=1, max_length=100)
+    is_superuser: bool = False
