@@ -3,8 +3,8 @@ from pydantic import BaseModel, ValidationError
 
 
 def model_middleware(model: type[BaseModel]):
-    def decorator(func, *args, **kwargs):
-        def wrapper():
+    def decorator(func):
+        def wrapper(*args, **kwargs):
             data = request.data
             try:
                 model_instance = model.model_validate_json(data, strict=True)

@@ -1,7 +1,7 @@
 from flask import Response, jsonify, request
 from pydantic import ValidationError
 
-from flask_ticket_system.domain import commands, exceptions
+from flask_ticket_system.domain import TicketStatus, commands, exceptions
 from flask_ticket_system.domain.tickets import Assigment, AssigmentType, Ticket
 from flask_ticket_system.entrypoints.flaskapp.messagebus import message_bus
 from flask_ticket_system.entrypoints.flaskapp.middleware import (
@@ -9,7 +9,11 @@ from flask_ticket_system.entrypoints.flaskapp.middleware import (
     model_middleware,
 )
 from flask_ticket_system.entrypoints.flaskapp.schemes import Assigment as PAssigment
-from flask_ticket_system.entrypoints.flaskapp.schemes import CreateTicket, Login
+from flask_ticket_system.entrypoints.flaskapp.schemes import (
+    CreateTicket,
+    Login,
+    UpdateTicket,
+)
 
 
 @model_middleware(CreateTicket)
@@ -70,5 +74,29 @@ def view_ticket(token: str, ticket_id: int):
                 "assigment_type": ticket.assigment.object_type,
                 "assigment_id": ticket.assigment.object_id,
             },
+        }
+    )
+
+
+@authorization_middleware
+@model_middleware(UpdateTicket)
+def update_ticket(token: str, update_ticket: UpdateTicket):
+    try:
+        ticket: Ticket = message_bus.handle(
+            commands.UpdateTicketCommand(
+                update_ticket.ticket_id,
+                TicketStatus.from_string(update_ticket.status),
+                token,
+            )
+        )
+    except exceptions.TicketNotFoundException:
+        return Response("Ticket not found", status=404)
+    except exceptions.UnauthorizedException:
+        return Response("Unauthorized", status=401)
+
+    return jsonify(
+        {
+            "id": ticket.id,
+            "status": ticket.status,
         }
     )

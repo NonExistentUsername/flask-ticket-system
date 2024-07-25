@@ -15,3 +15,11 @@ class TicketNotFoundException(InternalException):
 
 class UnauthorizedException(InternalException):
     pass
+
+
+class GroupNotFoundException(InternalException):
+    pass
+
+
+class UserNotFoundException(InternalException):
+    pass

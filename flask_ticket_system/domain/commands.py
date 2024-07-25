@@ -36,3 +36,49 @@ class GetTicketCommand(Command):
     ):
         self.ticket_id = ticket_id
         self.token = token
+
+
+class UpdateTicketCommand(Command):
+    def __init__(
+        self,
+        ticket_id: int,
+        status: TicketStatus,
+        token: str,
+    ):
+        self.ticket_id = ticket_id
+        self.status = status
+        self.token = token
+
+
+class CreateGroupCommand(Command):
+    def __init__(
+        self,
+        name: str,
+        token: str,
+    ):
+        self.name = name
+        self.token = token
+
+
+class AddUserToGroupCommand(Command):
+    def __init__(
+        self,
+        user_id: int,
+        group_id: int,
+        token: str,
+    ):
+        self.user_id = user_id
+        self.group_id = group_id
+        self.token = token
+
+
+class AddPermissionToGroupCommand(Command):
+    def __init__(
+        self,
+        permission: str,
+        group_id: int,
+        token: str,
+    ):
+        self.permission = permission
+        self.group_id = group_id
+        self.token = token
