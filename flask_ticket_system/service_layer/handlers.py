@@ -166,6 +166,30 @@ def create_user(
     command: commands.CreateUserCommand,
     uow: AbstractUnitOfWork,
 ):
+    decoded_token = User.decode_token(command.token)
+    user = uow.users.get(id=decoded_token.get("id", -1))
+
+    if not user:
+        raise exceptions.UnauthorizedException("User not found")
+
+    if not user.is_superuser:
+        raise exceptions.UnauthorizedException("Unauthorized")
+
+    user = User(
+        username=command.username,
+        password=command.password,
+        is_superuser=command.is_superuser,
+    )
+    uow.users.add(user)
+    uow.commit()
+    return user
+
+
+@register_handler(commands.CreateUserForcedCommand)
+def create_user_forced(
+    command: commands.CreateUserForcedCommand,
+    uow: AbstractUnitOfWork,
+):
     user = User(
         username=command.username,
         password=command.password,

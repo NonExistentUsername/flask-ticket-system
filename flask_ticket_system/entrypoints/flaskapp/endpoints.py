@@ -71,20 +71,20 @@ def view_ticket(token: str, ticket_id: int):
             "content": ticket.content,
             "status": ticket.status,
             "assigment": {
-                "assigment_type": ticket.assigment.object_type,
+                "assigment_type": ticket.assigment.object_type.name.lower(),
                 "assigment_id": ticket.assigment.object_id,
             },
         }
     )
 
 
-@authorization_middleware
 @model_middleware(UpdateTicket)
-def update_ticket(token: str, update_ticket: UpdateTicket):
+@authorization_middleware
+def update_ticket(token: str, update_ticket: UpdateTicket, ticket_id: int):
     try:
         ticket: Ticket = message_bus.handle(
             commands.UpdateTicketCommand(
-                update_ticket.ticket_id,
+                ticket_id,
                 TicketStatus.from_string(update_ticket.status),
                 token,
             )

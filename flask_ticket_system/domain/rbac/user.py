@@ -47,7 +47,7 @@ class User(BaseModel):
     def create_token(self) -> str:
         return str(
             jwt.encode(
-                {"id": self.id, "exp": "idkwhen"},
+                {"id": self.id},
                 config.get_secret_key(),
                 algorithm="HS256",
             )

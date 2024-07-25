@@ -15,7 +15,7 @@ def my_create_message_bus() -> "MessageBus":
 
     # Add admin account
     msbus.handle(
-        commands.CreateUserCommand(
+        commands.CreateUserForcedCommand(
             username="admin",
             password="admin",
             is_superuser=True,

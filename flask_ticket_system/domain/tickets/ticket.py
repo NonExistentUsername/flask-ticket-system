@@ -54,6 +54,9 @@ class Ticket(BaseModel):
         return ticket
 
     def can_view(self, user: User) -> bool:
+        if user.is_superuser:
+            return True
+
         if self.assigment.object_type == "group":
             return user.has_permission(
                 Permission(
@@ -65,6 +68,9 @@ class Ticket(BaseModel):
         return user.id == self.assigment.object_id
 
     def can_change_status(self, user: User) -> bool:
+        if user.is_superuser:
+            return True
+
         if self.assigment.object_type == "group":
             return user.has_permission(
                 Permission(

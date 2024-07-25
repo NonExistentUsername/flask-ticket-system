@@ -16,12 +16,13 @@ from flask_ticket_system.entrypoints.flaskapp.schemes import Assigment as PAssig
 from flask_ticket_system.entrypoints.flaskapp.schemes import CreateGroup, CreateUser
 
 
-@authorization_middleware
 @model_middleware(CreateUser)
+@authorization_middleware
 def create_user(token: str, create_user: CreateUser):
     try:
         user: User = message_bus.handle(
             commands.CreateUserCommand(
+                token,
                 create_user.username,
                 create_user.password,
                 create_user.is_superuser,
@@ -29,6 +30,8 @@ def create_user(token: str, create_user: CreateUser):
         )
     except exceptions.UserAlreadyExistsException:
         return Response("User already exists", status=400)
+    except exceptions.UnauthorizedException as e:
+        return Response(status=401)
 
     return jsonify(
         {
@@ -58,32 +61,44 @@ def create_group(token: str, create_group: CreateGroup):
 
 
 @model_middleware(AddUserToGroup)
-def add_user_to_group(add_user_to_group: AddUserToGroup):
+@authorization_middleware
+def add_user_to_group(token: str, add_user_to_group: AddUserToGroup):
     try:
         message_bus.handle(
             commands.AddUserToGroupCommand(
                 add_user_to_group.user_id,
                 add_user_to_group.group_id,
-                add_user_to_group.token,
+                token,
             )
         )
     except exceptions.UnauthorizedException:
         return Response(status=401)
 
-    return Response(status=200)
+    return jsonify(
+        {
+            "user_id": add_user_to_group.user_id,
+            "group_id": add_user_to_group.group_id,
+        }
+    )
 
 
 @model_middleware(AddPermissionToGroup)
-def add_permission_to_group(add_permission_to_group: AddPermissionToGroup):
+@authorization_middleware
+def add_permission_to_group(token: str, add_permission_to_group: AddPermissionToGroup):
     try:
         message_bus.handle(
             commands.AddPermissionToGroupCommand(
                 add_permission_to_group.permission,
                 add_permission_to_group.group_id,
-                add_permission_to_group.token,
+                token,
             )
         )
     except exceptions.UnauthorizedException:
         return Response(status=401)
 
-    return Response(status=200)
+    return jsonify(
+        {
+            "permission": add_permission_to_group.permission,
+            "group_id": add_permission_to_group.group_id,
+        }
+    )

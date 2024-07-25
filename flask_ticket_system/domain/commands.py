@@ -21,6 +21,20 @@ class CreateTicketCommand(Command):
 class CreateUserCommand(Command):
     def __init__(
         self,
+        token: str,
+        username: str,
+        password: str,
+        is_superuser: bool = False,
+    ):
+        self.token = token
+        self.username = username
+        self.password = password
+        self.is_superuser = is_superuser
+
+
+class CreateUserForcedCommand(Command):
+    def __init__(
+        self,
         username: str,
         password: str,
         is_superuser: bool = False,

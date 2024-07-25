@@ -13,9 +13,9 @@ class AssigmentType(enum.Enum):
 
     @staticmethod
     def from_string(string: str) -> "AssigmentType":
-        if string == AssigmentType.USER:
+        if string.lower() == "user":
             return AssigmentType.USER
-        elif string == AssigmentType.GROUP:
+        elif string.lower() == "group":
             return AssigmentType.GROUP
         else:
             raise AssigmentException(f"Invalid AssigmentType: {string}")
